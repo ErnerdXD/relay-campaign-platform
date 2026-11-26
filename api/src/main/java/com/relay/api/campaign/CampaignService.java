@@ -17,6 +17,8 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class CampaignService {
 
+    private static final Logger log = LoggerFactory.getLogger(CampaignService.class);
     private static final int BATCH_SIZE = 500;
 
     private final CampaignRepository campaigns;
@@ -91,6 +94,8 @@ public class CampaignService {
             throw new ApiException(HttpStatus.PAYMENT_REQUIRED, "Monthly message quota exceeded.");
         }
 
+        log.info("campaign.created tenantId={} campaignId={} channel={} recipients={} scheduledAt={}",
+                tenant.id(), id, channel, total[0], scheduledAt);
         return new CampaignRepository.CampaignSummary(id, "SCHEDULED", total[0]);
     }
 
