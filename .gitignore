@@ -1,0 +1,25 @@
+# Java
+api/target/
+*.class
+*.jar.original
+
+# Node
+node_modules/
+web/dist/
+.expo/
+.expo-shared/
+*.tsbuildinfo
+
+# Runtime data
+api/data/
+*.mv.db
+*.trace.db
+
+# Local config
+.env
+.env.local
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
