@@ -1,8 +1,10 @@
 package com.relay.api.campaign;
 
+import com.relay.api.common.ApiException;
 import jakarta.annotation.PreDestroy;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -12,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -70,6 +73,20 @@ public class DeliveryWorker {
         } finally {
             ticking.set(false);
         }
+    }
+
+    public Map<String, Object> sendNow(long jobId, String tenantId, Channel channel) {
+        Job job = campaigns.findJob(jobId, tenantId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Notification job not found."));
+        if (job.channel() != channel) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "channel does not match the job.");
+        }
+        if (!campaigns.claimJob(jobId, tenantId)) {
+            throw new ApiException(HttpStatus.CONFLICT, "Job is not pending.");
+        }
+
+        deliver(job);
+        return Map.of("notificationId", jobId, "status", campaigns.jobStatus(jobId));
     }
 
     private void deliver(Job job) {

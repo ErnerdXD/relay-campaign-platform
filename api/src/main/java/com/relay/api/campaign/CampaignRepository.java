@@ -144,6 +144,41 @@ public class CampaignRepository {
                 """, reason, jobId);
     }
 
+    public Optional<Job> findJob(long jobId, String tenantId) {
+        return jdbc.query("""
+                SELECT j.id, j.tenant_id, j.campaign_id, j.recipient_ref, j.channel, j.attempts,
+                       j.dedupe_key, COALESCE(r.timezone, t.timezone) AS timezone, c.transactional
+                FROM notification_jobs j
+                JOIN recipients r ON r.campaign_id = j.campaign_id AND r.recipient_ref = j.recipient_ref
+                JOIN campaigns c ON c.id = j.campaign_id
+                JOIN tenants t ON t.id = j.tenant_id
+                WHERE j.id = ? AND j.tenant_id = ?
+                """,
+                (rs, rowNum) -> new Job(
+                        rs.getLong("id"),
+                        rs.getString("tenant_id"),
+                        rs.getString("campaign_id"),
+                        rs.getString("recipient_ref"),
+                        Channel.valueOf(rs.getString("channel")),
+                        rs.getInt("attempts"),
+                        rs.getString("dedupe_key"),
+                        rs.getString("timezone"),
+                        rs.getBoolean("transactional")),
+                jobId, tenantId).stream().findFirst();
+    }
+
+    public boolean claimJob(long jobId, String tenantId) {
+        return jdbc.update("""
+                UPDATE notification_jobs
+                SET status = 'PROCESSING'
+                WHERE id = ? AND tenant_id = ? AND status = 'PENDING'
+                """, jobId, tenantId) == 1;
+    }
+
+    public String jobStatus(long jobId) {
+        return jdbc.queryForObject("SELECT status FROM notification_jobs WHERE id = ?", String.class, jobId);
+    }
+
     public long countJobsThisMonth(String tenantId, Instant from, Instant to) {
         Long count = jdbc.queryForObject("""
                 SELECT COUNT(*) FROM notification_jobs

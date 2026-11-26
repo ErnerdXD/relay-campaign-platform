@@ -1,0 +1,4 @@
+recipientId,email,phone,timezone
+ada,ada@example.com,,Asia/Kuala_Lumpur
+grace,grace@example.com,+60123456789,
+linus,linus@example.com,+6591234567,Asia/Singapore
