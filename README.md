@@ -197,3 +197,12 @@ docs/       System design document and architecture diagram
 ## Scope and honesty
 
 This is a simulated platform: no SMTP, SMS, or push provider is contacted. H2 keeps the demo one command; the design document describes the PostgreSQL and queue topology I would ship. The demo bearer tokens are fixtures, not an authentication system. Everything in this repository was built and verified locally, and the AI-assistance disclosure is in the engineering notes.
+
+## Submission checklist
+
+- [x] Public repository with source code
+- [x] README with local and Docker run instructions
+- [x] `ENGINEERING_NOTES.md` with decisions, tradeoffs, limitations, and AI disclosure
+- [x] `docs/SYSTEM_DESIGN.docx` with the 10M notifications/day design
+- [x] Docker Compose and GitHub Actions
+- [x] 20 API tests passing, web build/lint clean, mobile TypeScript check clean
